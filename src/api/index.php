@@ -99,6 +99,15 @@ $app = new Micro($container);
 // );
 //---------------------------------------------------by handle-------------------------------------
 $app->get(
+    '/api',
+    [
+        $prod,
+        'welcome'
+
+    ]
+);
+
+$app->get(
     '/api/search/{name}',
     [
         $prod,
@@ -119,6 +128,39 @@ $app->get(
         $prod,
         'gettoken'
     ]
+);
+$app->get(
+    '/api/search/{per_page}/{page}',
+    [
+        $prod,
+        'getlimit'
+    ]
+);
+
+$app->before(
+    function () use ($app) {
+        $url =  $_SERVER['REQUEST_URI'];
+        if (!strpos($url, 'api/gettoken')) {
+            $token = $app->request->getQuery('Token');
+            // echo $token;
+            // die;
+            $key = "Admin_Key";
+            // echo $key;
+            // die;
+            $tokendecode = JWT::decode($token, new Key($key, 'HS256'));
+            //  print_r($decoded);
+            //  die;
+            if ($tokendecode->role == 'admin') {
+                echo "Access Granted <br>";
+                // die;
+            } else {
+                echo "Please Enter Valid Token!!!!!";
+                die;
+            }
+        }
+
+        return true;
+    }
 );
 //---------------------------------------------------------------------------------------------------------------------------------
 $app->handle(
